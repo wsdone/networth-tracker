@@ -201,7 +201,25 @@ docker compose up -d
 
 ## 截图
 
-> TODO: 添加项目截图
+### 仪表盘
+![仪表盘](screenshots/dashboard.png)
+
+### 账户管理
+![账户管理](screenshots/accounts.png)
+
+### 持仓管理
+![持仓管理](screenshots/holdings.png)
+
+### 收支记录
+![收支记录](screenshots/expenses.png)
+
+### 负债管理
+![负债管理](screenshots/liabilities.png)
+
+### 移动端适配
+![移动端](screenshots/mobile.png)
+
+> 截图使用演示数据，内置"隐藏金额"功能，一键将所有金额替换为 `***`，方便截图分享。
 
 ## License
 

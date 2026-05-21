@@ -54,6 +54,13 @@
           <span>系统设置</span>
         </router-link>
       </div>
+
+      <div class="sidebar-bottom">
+        <div class="hide-toggle" @click="hideAmounts = !hideAmounts">
+          <el-icon><View v-if="!hideAmounts" /><Hide v-else /></el-icon>
+          <span>{{ hideAmounts ? '显示金额' : '隐藏金额' }}</span>
+        </div>
+      </div>
     </aside>
 
     <!-- 主内容 -->
@@ -65,7 +72,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Wallet, DataAnalysis, TrendCharts, ShoppingCart, CreditCard, Histogram, Document, Setting, Operation, Close } from '@element-plus/icons-vue'
+import { Wallet, DataAnalysis, TrendCharts, ShoppingCart, CreditCard, Histogram, Document, Setting, Operation, Close, View, Hide } from '@element-plus/icons-vue'
+import { hideAmounts } from '@/utils/format'
 
 const mobileMenuOpen = ref(false)
 </script>
@@ -93,6 +101,14 @@ body {
   height: 100vh;
   position: sticky;
   top: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  border-top: 1px solid #f0f0f0;
+  padding: 8px 0;
 }
 
 .logo {
@@ -130,6 +146,22 @@ body {
 
 .nav-item:hover { background: #f5f7fa; color: #409eff; }
 .nav-item.active { background: #ecf5ff; color: #409eff; font-weight: 500; }
+
+.hide-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 13px;
+  color: #909399;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.hide-toggle:hover {
+  background: #f5f7fa;
+  color: #409eff;
+}
 
 /* 主内容 */
 .main-content {

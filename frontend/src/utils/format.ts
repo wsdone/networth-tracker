@@ -1,5 +1,13 @@
+import { ref } from 'vue'
+
+export const hideAmounts = ref(false)
+
 export function formatMoney(value: number | null | undefined, currency = 'CNY'): string {
   if (value == null) return '--'
+  if (hideAmounts.value) {
+    const symbols: Record<string, string> = { CNY: '¥', USD: '$', HKD: 'HK$' }
+    return `${symbols[currency] || ''}***`
+  }
   const abs = Math.abs(value)
   const formatted = abs.toLocaleString('zh-CN', {
     minimumFractionDigits: 2,

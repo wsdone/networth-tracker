@@ -14,3 +14,4 @@ pgdata/
 *.sqlite3
 *.bak
 test_e2e.py
+backend/.vite/

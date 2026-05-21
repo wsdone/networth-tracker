@@ -3,6 +3,14 @@
     <div class="page-header"><h2>系统设置</h2></div>
 
     <el-card shadow="hover" class="section-card">
+      <template #header><span>隐私模式</span></template>
+      <div class="backup-row">
+        <span>隐藏所有金额（显示为 ***），截图分享时使用</span>
+        <el-switch v-model="hideAmounts" active-text="隐藏" inactive-text="显示" />
+      </div>
+    </el-card>
+
+    <el-card shadow="hover" class="section-card">
       <template #header><span>汇率管理</span></template>
       <el-button type="primary" @click="refreshRates" :loading="refreshing" size="small">刷新汇率</el-button>
       <div class="table-scroll">
@@ -57,6 +65,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/api'
+import { hideAmounts } from '@/utils/format'
 
 const rates = ref<any[]>([])
 const refreshing = ref(false)
