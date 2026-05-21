@@ -223,4 +223,4 @@ docker compose up -d
 
 ## License
 
-[MIT No Commercial Use](LICENSE) — 个人学习、研究、非商业用途可自由使用，禁止商用。如需商业授权请联系作者。
+[AGPL 3.0](LICENSE)
