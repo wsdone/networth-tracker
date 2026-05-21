@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+node_modules/
+dist/
+*.egg-info/
+.venv/
+venv/
+pgdata/
+*.log
+.DS_Store
+*.db
+*.sqlite3
+*.bak
+test_e2e.py
