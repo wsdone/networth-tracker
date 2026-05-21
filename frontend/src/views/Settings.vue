@@ -3,6 +3,25 @@
     <div class="page-header"><h2>系统设置</h2></div>
 
     <el-card shadow="hover" class="section-card">
+      <template #header><span>密码保护</span></template>
+      <template v-if="!authEnabled">
+        <div class="backup-row">
+          <span>设置密码后，每次访问需要先解锁</span>
+          <el-button type="primary" size="small" @click="showSetPasswordDialog">设置密码</el-button>
+        </div>
+      </template>
+      <template v-else>
+        <div class="backup-row">
+          <span style="color: #67c23a">密码保护已开启</span>
+          <div style="display: flex; gap: 8px">
+            <el-button size="small" @click="showChangePasswordDialog">修改密码</el-button>
+            <el-button type="danger" size="small" @click="handleDisableAuth">关闭密码</el-button>
+          </div>
+        </div>
+      </template>
+    </el-card>
+
+    <el-card shadow="hover" class="section-card">
       <template #header><span>隐私模式</span></template>
       <div class="backup-row">
         <span>隐藏所有金额（显示为 ***），截图分享时使用</span>
@@ -58,11 +77,30 @@
         <div style="font-size: 12px; color: #909399; margin-top: 4px">恢复前会自动备份当前数据库，恢复后需要重启后端服务</div>
       </div>
     </el-card>
+
+    <!-- 设置密码对话框 -->
+    <el-dialog v-model="pwdDialogVisible" :title="pwdMode === 'set' ? '设置密码' : '修改密码'" width="380px" class="responsive-dialog">
+      <el-form :model="pwdForm" label-position="top" class="mobile-form">
+        <el-form-item v-if="pwdMode === 'change'" label="原密码">
+          <el-input v-model="pwdForm.old_password" type="password" show-password placeholder="输入当前密码" />
+        </el-form-item>
+        <el-form-item :label="pwdMode === 'set' ? '设置密码' : '新密码'">
+          <el-input v-model="pwdForm.password" type="password" show-password placeholder="至少6位" />
+        </el-form-item>
+        <el-form-item label="确认密码">
+          <el-input v-model="pwdForm.confirm" type="password" show-password placeholder="再次输入" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="pwdDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleSetPassword" :loading="pwdSubmitting">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/api'
 import { hideAmounts } from '@/utils/format'
@@ -70,6 +108,11 @@ import { hideAmounts } from '@/utils/format'
 const rates = ref<any[]>([])
 const refreshing = ref(false)
 const backupLoading = ref(false)
+const authEnabled = ref(false)
+const pwdDialogVisible = ref(false)
+const pwdMode = ref<'set' | 'change'>('set')
+const pwdSubmitting = ref(false)
+const pwdForm = reactive({ password: '', confirm: '', old_password: '' })
 
 async function fetchRates() {
   const { data } = await api.get('/market/exchange-rates')
@@ -131,7 +174,70 @@ async function handleRestoreFile(uploadFile: any) {
   }
 }
 
-onMounted(fetchRates)
+onMounted(async () => {
+  await fetchRates()
+  try {
+    const { data } = await api.get('/auth/status')
+    authEnabled.value = data.enabled
+  } catch {}
+})
+
+async function fetchAuthStatus() {
+  try {
+    const { data } = await api.get('/auth/status')
+    authEnabled.value = data.enabled
+  } catch {}
+}
+
+function showSetPasswordDialog() {
+  pwdMode.value = 'set'
+  pwdForm.password = ''
+  pwdForm.confirm = ''
+  pwdForm.old_password = ''
+  pwdDialogVisible.value = true
+}
+
+function showChangePasswordDialog() {
+  pwdMode.value = 'change'
+  pwdForm.password = ''
+  pwdForm.confirm = ''
+  pwdForm.old_password = ''
+  pwdDialogVisible.value = true
+}
+
+async function handleSetPassword() {
+  if (pwdForm.password.length < 6) return ElMessage.warning('密码至少6位')
+  if (pwdForm.password !== pwdForm.confirm) return ElMessage.warning('两次输入不一致')
+  pwdSubmitting.value = true
+  try {
+    await api.post('/auth/setup', {
+      password: pwdForm.password,
+      old_password: pwdForm.old_password,
+    })
+    ElMessage.success(pwdMode.value === 'set' ? '密码已设置' : '密码已修改')
+    pwdDialogVisible.value = false
+    await fetchAuthStatus()
+  } catch (e: any) {
+    ElMessage.error(e.response?.data?.detail || '操作失败')
+  } finally {
+    pwdSubmitting.value = false
+  }
+}
+
+async function handleDisableAuth() {
+  try {
+    const { value } = await ElMessageBox.prompt('请输入当前密码以关闭密码保护', '关闭密码保护', {
+      confirmButtonText: '关闭',
+      cancelButtonText: '取消',
+      inputType: 'password',
+    })
+    await api.post('/auth/disable', { password: value })
+    ElMessage.success('密码保护已关闭')
+    await fetchAuthStatus()
+  } catch (e: any) {
+    if (e !== 'cancel' && e?.response) ElMessage.error(e.response?.data?.detail || '操作失败')
+  }
+}
 </script>
 
 <style scoped>

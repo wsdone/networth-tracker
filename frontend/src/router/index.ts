@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import api from '@/api'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -6,6 +7,12 @@ const router = createRouter({
     {
       path: '/',
       redirect: '/dashboard',
+    },
+    {
+      path: '/login',
+      name: 'Login',
+      component: () => import('@/views/Login.vue'),
+      meta: { public: true },
     },
     {
       path: '/dashboard',
@@ -43,6 +50,46 @@ const router = createRouter({
       component: () => import('@/views/Settings.vue'),
     },
   ],
+})
+
+// Auth guard
+let authChecked = false
+
+router.beforeEach(async (to, _from, next) => {
+  if (to.meta.public) return next()
+
+  // Check auth status once per session
+  if (!authChecked) {
+    try {
+      const { data } = await api.get('/auth/status')
+      if (!data.enabled) {
+        authChecked = true
+        return next()
+      }
+      // Auth enabled — check token
+      const token = localStorage.getItem('auth_token')
+      if (token) {
+        try {
+          await api.post('/auth/verify', `token=${token}`)
+          authChecked = true
+          return next()
+        } catch {}
+      }
+      return next('/login')
+    } catch {
+      return next()
+    }
+  }
+
+  // Already checked: if auth enabled and no token, redirect
+  const token = localStorage.getItem('auth_token')
+  if (!token) {
+    try {
+      const { data } = await api.get('/auth/status')
+      if (data.enabled) return next('/login')
+    } catch {}
+  }
+  next()
 })
 
 export default router

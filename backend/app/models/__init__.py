@@ -9,6 +9,7 @@ from app.models.exchange_rate import ExchangeRate
 from app.models.snapshot import DailySnapshot
 from app.models.expense import Expense
 from app.models.repayment import RepaymentPlan, RepaymentItem
+from app.models.auth import AuthConfig
 
 __all__ = [
     "Base",
@@ -28,4 +29,5 @@ __all__ = [
     "Expense",
     "RepaymentPlan",
     "RepaymentItem",
+    "AuthConfig",
 ]

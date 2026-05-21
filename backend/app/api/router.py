@@ -11,6 +11,7 @@ from app.api.expenses import router as expenses_router
 from app.api.repayment import router as repayment_router
 from app.api.bill_import import router as bill_import_router
 from app.api.backup import router as backup_router
+from app.api.auth import router as auth_router
 
 api_router = APIRouter()
 
@@ -25,3 +26,4 @@ api_router.include_router(expenses_router, prefix="/expenses", tags=["expenses"]
 api_router.include_router(repayment_router, prefix="/repayment-plans", tags=["repayment"])
 api_router.include_router(bill_import_router, prefix="/import", tags=["import"])
 api_router.include_router(backup_router, prefix="/backup", tags=["backup"])
+api_router.include_router(auth_router, prefix="/auth", tags=["auth"])
